@@ -30,7 +30,7 @@ dotenv.config({
 connectDB()
 
 
-const port = process.env.PORT || 5000
+const port = process.env.PORT || 5001
 
 const app = express()
 
@@ -40,7 +40,7 @@ const app = express()
 
 
 app.use(cors({
-    origin: ['http://localhost:3000'],
+    origin: ["http://localhost:3000", "https://vigorous-volhard-c82a2c.netlify.app"],
     credentials: true
 }))
 const server = http.createServer(app)
