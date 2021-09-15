@@ -20,7 +20,7 @@ router.use('/battle', battleRouter)
 
 router.get('/', (req, res) => {
 
-    res.send('root path')
+    res.send('root path0')
 })
 
 
