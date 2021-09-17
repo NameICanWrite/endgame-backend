@@ -4,16 +4,26 @@ import isEmail from 'isemail'
 import jwt from 'jsonwebtoken'
 import dotenv from 'dotenv'
 
-import {addJwtCookie} from '../../utils/jwt.js'
+import {
+  addJwtCookie
+} from '../../utils/jwt.js'
 
-dotenv.config({path: './server/.env'})
+dotenv.config({
+  path: './server/.env'
+})
 
 
 export const signUp = async (req, res) => {
-  const { username, email, password } = req.body;
+  const {
+    username,
+    email,
+    password
+  } = req.body;
 
   //check if user exists
-  let user = await User.findOne({ username });
+  let user = await User.findOne({
+    username
+  });
   if (user) {
     return res.status(400).send('User already exists');
   }
@@ -28,20 +38,39 @@ export const signUp = async (req, res) => {
       clicks: 0
     }
   });
-  await user.save();
 
+  //add token to response
   addJwtCookie(res, user._id)
 
-  res.status(200).send('Sign up successful')
+  //save user && send response
+  await user.save()
+    .then(() => 
+      res.status(200).send('Sign up successful')
+    ).catch((err) => 
+    console.log(err)
+      // res.status(400).send(err.message.split(': ').slice(-1)[0])
+    );
 };
 
 
 export const login = async (req, res) => {
-  const { username, password } = req.body;
+  const {
+    username,
+    password
+  } = req.body;
+
+  if (!username) {return res.status(400).send('Name is required')}
+
   //find user
-  let user 
-  if (isEmail.validate(username, {errorLevel: false}) == true) user = await User.findOne({ email: username });
-  else user = await User.findOne({username})
+  let user
+  if (isEmail.validate(username, {
+      errorLevel: false
+    }) == true) user = await User.findOne({
+    email: username
+  });
+  else user = await User.findOne({
+    username
+  })
   if (!user) {
     return res.status(400).send('User doesn\'t exist');
   }
@@ -58,7 +87,7 @@ export const login = async (req, res) => {
 };
 
 
-export const logout  = (req, res) => {
+export const logout = (req, res) => {
   res.clearCookie('jwt')
   res.status(200).send('Log out successful');
 };

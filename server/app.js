@@ -30,7 +30,7 @@ dotenv.config({
 connectDB()
 
 
-const port = process.env.PORT || 5001
+const port = process.env.PORT || 5000
 
 const app = express()
 
@@ -141,7 +141,7 @@ io.on('connection', async (socket) => {
     socket.on('fight timer start', (battleData) => {
         console.log('fight timer start')
         battleData.fightTimer = 3
-        const interval = setInterval(() => {
+        const interval = setInterval(async () => {
             battleData.fightTimer--
             console.log('fight timer: ' + battleData.fightTimer)
 
@@ -162,9 +162,37 @@ io.on('connection', async (socket) => {
                 battleData.fightTimer = undefined
 
                 Battle.findByIdAndUpdate(battle._id, battleData)
-            }
-            
-            io.to(battle.id).emit('update battle', battleData)
+
+                //if battle should be continued
+                if (!battleData.users.some(user => user.hp <= 0)) {
+
+                    await Battle.findByIdAndUpdate(battle._id, battleData)
+                    socket.broadcast.to(battle.id).emit('update battle', battleData)
+                } else {
+
+                    //claim winner and finish battle
+                    battleData.winner = battleData.users.find(user => user.hp > 0)?.username || 'death'
+                    io.to(battle.id).emit('finish battle', battleData)
+                    await Battle.findByIdAndDelete(battle._id)
+
+                    //update user stats
+                    const winner = await User.findOne({
+                        username: battleData.winner
+                    })
+                    if (winner.data.wins) {
+                        winner.data.wins++
+                    } else {
+                        winner.data.wins = 1
+                    }
+                    await User.updateOne({
+                        username: battleData.winner
+                    }, {
+                        $set: {
+                            data: winner.data
+                        }
+                    })
+                }
+            } else socket.broadcast.to(battle.id).emit('update battle', battleData)
         }, 1000)
     })
 
