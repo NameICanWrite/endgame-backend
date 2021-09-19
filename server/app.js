@@ -128,6 +128,7 @@ io.on('connection', async (socket) => {
                             data: winner.data
                         }
                     })
+                    socket.disconnect(true)
                 }
             } else {
 
@@ -227,6 +228,7 @@ io.on('connection', async (socket) => {
             io.to(battle.id).emit('finish battle', battleData)
             await Battle.findByIdAndDelete(battle._id)
             clearInterval(data.turnTimer)
+            socket.disconnect(true)
           }
         }
         }, 1000)
