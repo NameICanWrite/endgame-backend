@@ -6,7 +6,8 @@ const battleSchema = mongoose.Schema({
         hp: Number,
         canMove: Boolean,
         currentMove: Number,
-        cards: [Number]
+        cards: [Number],
+        turnTimer: Number
     }],
     winner: String
 });

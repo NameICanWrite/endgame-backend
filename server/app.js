@@ -67,6 +67,7 @@ io.use(socketioJwt.authorize({
 //I'm sorry but I dont know how to export this to other files
 
 
+const roomsData = new Map()
 //reconnect + get battle from DB every time page reloads
 io.on('connection', async (socket) => {
     const userId = socket.decoded_token.id
@@ -153,13 +154,14 @@ io.on('connection', async (socket) => {
                 battleData = calculateHP(battleData)
 
                 //delete previous round
-                battleData.users[0].currentMove = undefined
-                battleData.users[1].currentMove = undefined
+                delete battleData.users[0].currentMove
+                delete battleData.users[1].currentMove
 
                 //choose who moves first in next round
-                battleData.users[Math.floor(Math.random())].canMove = true
+                
+                battleData.users[Math.round(Math.random())].canMove = true
 
-                battleData.fightTimer = undefined
+                delete battleData.fightTimer
 
                 Battle.findByIdAndUpdate(battle._id, battleData)
 
@@ -196,26 +198,46 @@ io.on('connection', async (socket) => {
         }, 1000)
     })
 
-    // socket.on('turn timer start', (battleData, index) => {
-    //     console.log('start turn timer')
-    //     battleData.users[index].turnTimer = 15
+    socket.on('turn timer start', (battleData, index) => {
+
+        if (battleData && (typeof index === 'number')) {console.log('start turn timer')
+        battleData.users[index].turnTimer = 15
+
+        const data = roomsData.get(battle.id) || {}
     
-    //     const interval = setInterval(() => {
-    //       battleData.users[index].turnTimer--
-    //       console.log('turn timer: ' + battleData.users[index].turnTimer)
+        data.turnTimer = setInterval(async () => {
+          battleData.users[index].turnTimer--
+          console.log('turn timer: ' + battleData.users[index].turnTimer)
     
-    //       io.to(battle.id).emit('update battle', battleData)
+          io.to(battle.id).emit('update battle', {...battleData})
+          await Battle.findByIdAndUpdate(battle._id, battleData)
     
-    //       if (battleData.users[index].turnTimer <= 0) {
-    //         battleData.winner = battleData.users.find((user, currentIndex) => currentIndex != index)
-    //         io.to(battle.id).emit('finish battle', battleData)
-    //         clearInterval(interval)
-    //       }
-    //     }, 1000)
-    
-    //     socket.on('stop turn timer', (currentIndex) => {
-    //         if (currentIndex == index) clearInterval(interval)
-    //     })
-    // })
+          //if turn was missed
+          if (battleData.users[index].turnTimer <= 0) {
+            battleData.winner = battleData.users.find((user, currentIndex) => currentIndex != index).username
+            battleData.users[0].canMove = false
+            battleData.users[1].canMove = false
+            io.to(battle.id).emit('finish battle', battleData)
+            await Battle.findByIdAndDelete(battle._id)
+            clearInterval(data.turnTimer)
+          }
+        }, 1000)
+        
+         
+        roomsData.set(battle.id, data)
+    } else {
+            console.log(index)
+            console.log(battleData)
+        }
+    })
+
+    socket.on('turn timer stop', async (battleData) => {
+        console.log('turn timer stop')
+            clearInterval(roomsData.get(battle.id).turnTimer)
+            delete battleData.users[0].turnTimer
+            delete battleData.users[1].turnTimer
+            io.to(battle.id).emit('update battle', battleData)
+            await Battle.findByIdAndUpdate(battle._id, battleData)
+    })
 })
 server.listen(port, () => console.log(`Listening on port ${port}`))
