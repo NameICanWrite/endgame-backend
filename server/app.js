@@ -157,6 +157,8 @@ io.on('connection', async (socket) => {
                 delete battleData.users[0].currentMove
                 delete battleData.users[1].currentMove
 
+                delete battleData.users[0].turnTimer
+                delete battleData.users[1].turnTimer
                 //choose who moves first in next round
                 
                 battleData.users[Math.round(Math.random())].canMove = true
@@ -206,14 +208,19 @@ io.on('connection', async (socket) => {
         const data = roomsData.get(battle.id) || {}
     
         data.turnTimer = setInterval(async () => {
+        console.log('interval cycle start ' + Date.now())
           battleData.users[index].turnTimer--
           console.log('turn timer: ' + battleData.users[index].turnTimer)
     
+            //check if interval wasn't cleared
+            let destroyed = roomsData.get(battle.id).turnTimer._destroyed
+          if (!destroyed) {
+            console.log(destroyed)
           io.to(battle.id).emit('update battle', {...battleData})
-          await Battle.findByIdAndUpdate(battle._id, battleData)
+          await Battle.findByIdAndUpdate(battle._id, battleData).then(() => console.log('on not destroyed ' + Date.now()))
     
           //if turn was missed
-          if (battleData.users[index].turnTimer <= 0) {
+          if (battleData.users[index].turnTimer === 0) {
             battleData.winner = battleData.users.find((user, currentIndex) => currentIndex != index).username
             battleData.users[0].canMove = false
             battleData.users[1].canMove = false
@@ -221,6 +228,7 @@ io.on('connection', async (socket) => {
             await Battle.findByIdAndDelete(battle._id)
             clearInterval(data.turnTimer)
           }
+        }
         }, 1000)
         
          
@@ -234,10 +242,15 @@ io.on('connection', async (socket) => {
     socket.on('turn timer stop', async (battleData) => {
         console.log('turn timer stop')
             clearInterval(roomsData.get(battle.id).turnTimer)
+            console.log(+
+                roomsData.get(battle.id).turnTimer._destroyed)
             delete battleData.users[0].turnTimer
             delete battleData.users[1].turnTimer
             io.to(battle.id).emit('update battle', battleData)
-            await Battle.findByIdAndUpdate(battle._id, battleData)
+            
+            await Battle.findByIdAndUpdate(battle._id, battleData).then(() => console.log('on destroyed ' + Date.now()))
+            
     })
 })
 server.listen(port, () => console.log(`Listening on port ${port}`))
+
