@@ -48,7 +48,7 @@ const io = new Server(server, {
     cors: {
         origin: "https://vigorous-volhard-c82a2c.netlify.app",
         methods: ["GET", "POST"],
-        allowedHeaders: ["my-custom-header"],
+        allowedHeaders: '*',
         credentials: true
     }
 })
