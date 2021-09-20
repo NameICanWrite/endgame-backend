@@ -1,6 +1,6 @@
 export function calculateHP(data) {
-    const card0 = cards[data.users[0].currentMove]
-    const card1 = cards[data.users[1].currentMove]
+    const card0 = data.users[0].currentMove
+    const card1 = data.users[1].currentMove
 
     let dmg0 = card1.attack - card0.defence
     let dmg1 = card0.attack - card1.defence
@@ -15,10 +15,18 @@ export function calculateHP(data) {
 }
 
 
+export function giveCards(user) {
+  let cards = user.cards
+  if (!Array.isArray(cards) || cards.length == 0) cards = []
+
+  while (cards.length < 5 || cards.some(card => !card.name)) {
+    let newCard = allCards[Math.floor(Math.random()*20)]
+    сфквіюзгір
+  } 
+}
 
 
-
-export const cards = [
+export const allCards = [
     {
       name: 'superman',
       defence: 19,
