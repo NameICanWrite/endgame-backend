@@ -1,5 +1,6 @@
 import Battle from "../models/battle.js"
 import User from "../models/user.js"
+import { giveCards } from "../utils/battleTools.js"
 
 
 export const startBattle = async (req, res) => {
@@ -7,18 +8,13 @@ export const startBattle = async (req, res) => {
         username,
         _id
     } = await User.findById(req.decoded.id)
-    const currentUser = {
+    let currentUser = {
         _id,
         username,
         hp: 20,
-        cards: [
-            Math.floor(Math.random()*19),
-            Math.floor(Math.random()*19),
-            Math.floor(Math.random()*19),
-            Math.floor(Math.random()*19),
-            Math.floor(Math.random()*19),
-        ]
     }
+
+    currentUser = giveCards(currentUser)
 
     let battle = await Battle.findOne({
         "users.1": {

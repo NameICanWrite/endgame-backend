@@ -17,7 +17,7 @@ import Battle from './models/battle.js';
 import User from './models/user.js'
 
 import {
-    calculateHP
+    calculateHP, giveCards
 } from './utils/battleTools.js'
 
 
@@ -160,8 +160,12 @@ io.on('connection', async (socket) => {
 
                 delete battleData.users[0].turnTimer
                 delete battleData.users[1].turnTimer
-                //choose who moves first in next round
                 
+                //give cards
+                battleData.users[1] = giveCards(battleData.users[1])
+                battleData.users[0] = giveCards(battleData.users[0])
+                
+                //choose who moves first in next round
                 battleData.users[Math.round(Math.random())].canMove = true
 
                 delete battleData.fightTimer
@@ -218,7 +222,7 @@ io.on('connection', async (socket) => {
           if (!destroyed) {
             console.log(destroyed)
           io.to(battle.id).emit('update battle', {...battleData})
-          await Battle.findByIdAndUpdate(battle._id, battleData).then(() => console.log('on not destroyed ' + Date.now()))
+          await Battle.findByIdAndUpdate(battle._id, battleData).catch(err => console.log(err.reason))
     
           //if turn was missed
           if (battleData.users[index].turnTimer === 0) {
@@ -244,13 +248,12 @@ io.on('connection', async (socket) => {
     socket.on('turn timer stop', async (battleData) => {
         console.log('turn timer stop')
             clearInterval(roomsData.get(battle.id).turnTimer)
-            console.log(+
-                roomsData.get(battle.id).turnTimer._destroyed)
+
             delete battleData.users[0].turnTimer
             delete battleData.users[1].turnTimer
             io.to(battle.id).emit('update battle', battleData)
             
-            await Battle.findByIdAndUpdate(battle._id, battleData).then(() => console.log('on destroyed ' + Date.now()))
+            await Battle.findByIdAndUpdate(battle._id, battleData).catch(err => console.log(err.reason))
             
     })
 })

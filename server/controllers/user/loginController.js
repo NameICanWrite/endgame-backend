@@ -29,7 +29,7 @@ export const signUp = async (req, res) => {
   }
 
   //create user
-  const hasdPsw = await bcrypt.hash(password, 12);
+  const hasdPsw = await bcrypt.hash(password, 12).catch(err => res.status(400).send('Password is required'))
   user = new User({
     username,
     email,
@@ -47,8 +47,7 @@ export const signUp = async (req, res) => {
     .then(() => 
       res.status(200).send('Sign up successful')
     ).catch((err) => 
-    console.log(err)
-      // res.status(400).send(err.message.split(': ').slice(-1)[0])
+      res.status(400).send(err.message.split(': ').slice(-1)[0])
     );
 };
 
