@@ -41,7 +41,6 @@ const app = express()
 
 app.use(cors({
     origin: ["https://vigorous-volhard-c82a2c.netlify.app", "http://localhost:3000"],
-    allowedHeaders: ["Origin","Accept", "X-Requested-With", "Access-Control-Request-Method", "Access-Control-Request-Headers"],
     methods: ["GET", "POST", "OPTIONS"],
     credentials: true
 }))
@@ -50,7 +49,6 @@ const io = new Server(server, {
     cors: {
         origin: ["https://vigorous-volhard-c82a2c.netlify.app", "http://localhost:3000"],
         methods: ["GET", "POST"],
-        allowedHeaders: ["Origin","Accept", "X-Requested-With",  "Access-Control-Request-Method", "Access-Control-Request-Headers"],
         credentials: true
     }
 })
