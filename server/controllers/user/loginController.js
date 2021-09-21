@@ -40,22 +40,25 @@ export const signUp = async (req, res) => {
     }
   });
 
-  //add token to response
-  addJwtCookie(res, user._id)
-
   //save user && send response
   await user.save()
     .then(() => {
-        //send email link token
-  let token_mail_verification = addJwtCookie(res, user._id);
-  //let token_mail_verification = '12jhjhdsjahdu2y3ud2'
-  let link = `Clik on link to continued registration http://localhost:5000/users/verify?"${token_mail_verification}`;
-  let linkhtml = `Clik on link to continued registration <a href src="localhost:5000/users/verify?id=${token_mail_verification}">Link</a><br>
-  Clik on link to continued registration http://localhost:5000/users/verify?id=${token_mail_verification}`;
-  mailto(email, link, linkhtml);
-      res.status(200).send('Sign up successful')
-    }).catch((err) => 
-      res.status(400).send(err.message.split(': ').slice(-1)[0])
+      const address = process.env.NODE_ENV == 'production' ? 'https://endgame-backend.herokuapp.com' : 'http://localhost:5000'
+      
+      //send email link token
+      let token_mail_verification = addJwtCookie(res, user._id);
+      
+      let link = `Clik on link to continued registration ${address}/users/verify?"${token_mail_verification}`;
+      let linkhtml = `Clik on link to continued registration <a href src="${address}/users/verify?id=${token_mail_verification}">Link</a><br>
+  Clik on link to continued registration ${address}/users/verify?id=${token_mail_verification}`;
+      mailto(email, link, linkhtml).then(() => {
+        res.status(200).send('Confirmation sent')
+      }).catch((err) => res.status(400).send(err.message))
+
+    }).catch((err) =>
+      res.status(400).send(err.message
+        //.split(': ').slice(-1)[0]
+      )
     );
 };
 
@@ -66,7 +69,9 @@ export const login = async (req, res) => {
     password
   } = req.body;
 
-  if (!username) {return res.status(400).send('Name is required')}
+  if (!username) {
+    return res.status(400).send('Name is required')
+  }
 
   //find user
   let user
@@ -87,20 +92,19 @@ export const login = async (req, res) => {
   if (!isMatch) {
     return res.status(401).send('Password incorrect');
   }
-  
-   //check status active
+
+  //check status active
   const statusUser = user.active;
-  if(statusUser == false) {
+  if (statusUser == false) {
     res.status(401).send('User not activeted');
-  }
-  else{
+  } else {
     addJwtCookie(res, user._id)
 
     res.status(200).send('Log in successful')
   }
 
 
- 
+
 };
 
 
