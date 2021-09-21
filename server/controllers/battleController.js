@@ -23,7 +23,7 @@ export const startBattle = async (req, res) => {
     })
     if (battle) {
         //check if user isn't in battle already
-        if (!battle.users.some(user => user._id == currentUser._id)) {
+        if (!battle.users.some(user => user.username == currentUser.username)) {
             currentUser.canMove = !battle.users[0].canMove
             await Battle.updateOne({
                 _id: battle._id
