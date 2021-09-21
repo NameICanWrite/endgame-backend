@@ -4,8 +4,11 @@ import http from 'http'
 
 import cors from 'cors'
 import helmet from 'helmet';
+import jwt from 'jsonwebtoken'
 import dotenv from 'dotenv'
+import {promisify} from 'util'
 import cookieParser from 'cookie-parser'
+import socketCookieParser from 'socket.io-cookie-parser'
 import {
     Server
 } from 'socket.io'
@@ -59,10 +62,8 @@ app.use('/', router)
 app.get('/', (req, res) => res.send('123'))
 
 
-io.use(socketioJwt.authorize({
-    secret: process.env.JWT_SECRET,
-    handshake: true
-}));
+
+io.use(socketCookieParser())
 
 //I'm sorry but I dont know how to export this to other files
 
@@ -70,7 +71,9 @@ io.use(socketioJwt.authorize({
 const roomsData = new Map()
 //reconnect + get battle from DB every time page reloads
 io.on('connection', async (socket) => {
-    const userId = socket.decoded_token.id
+    const token = socket.request.cookies.jwt
+    const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET).catch(err => console.log(err.message))
+    const userId = decoded.id
     let enemyId
     let battle = await Battle.findOne({
         users: {
@@ -129,6 +132,7 @@ io.on('connection', async (socket) => {
                         }
                     })
                     socket.disconnect(true)
+                    clearInterval(roomsData.get(battle.id).turnTimer)
                 }
             } else {
 
@@ -213,14 +217,12 @@ io.on('connection', async (socket) => {
         const data = roomsData.get(battle.id) || {}
     
         data.turnTimer = setInterval(async () => {
-        console.log('interval cycle start ' + Date.now())
           battleData.users[index].turnTimer--
           console.log('turn timer: ' + battleData.users[index].turnTimer)
     
             //check if interval wasn't cleared
             let destroyed = roomsData.get(battle.id).turnTimer._destroyed
           if (!destroyed) {
-            console.log(destroyed)
           io.to(battle.id).emit('update battle', {...battleData})
           await Battle.findByIdAndUpdate(battle._id, battleData).catch(err => console.log(err.reason))
     
