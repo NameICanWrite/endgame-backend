@@ -93,8 +93,8 @@ export const login = async (req, res) => {
     return res.status(401).send('Password incorrect');
   }
 
-  //check status active
-  const statusUser = user.active;
+  //check status active if needed
+  const statusUser = user.active || !process.env.CONFIRM_EMAIL;
   if (statusUser == false) {
     res.status(401).send('User not activeted');
   } else {
