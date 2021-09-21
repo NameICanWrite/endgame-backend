@@ -7,6 +7,7 @@ import dotenv from 'dotenv'
 import {
   addJwtCookie
 } from '../../utils/jwt.js'
+import mailto from '../../configs/mailto.js'
 
 dotenv.config({
   path: './server/.env'
@@ -44,9 +45,16 @@ export const signUp = async (req, res) => {
 
   //save user && send response
   await user.save()
-    .then(() => 
+    .then(() => {
+        //send email link token
+  let token_mail_verification = addJwtCookie(res, user._id);
+  //let token_mail_verification = '12jhjhdsjahdu2y3ud2'
+  let link = `Clik on link to continued registration http://localhost:5000/users/verify?"${token_mail_verification}`;
+  let linkhtml = `Clik on link to continued registration <a href src="localhost:5000/users/verify?id=${token_mail_verification}">Link</a><br>
+  Clik on link to continued registration http://localhost:5000/users/verify?id=${token_mail_verification}`;
+  mailto(email, link, linkhtml);
       res.status(200).send('Sign up successful')
-    ).catch((err) => 
+    }).catch((err) => 
       res.status(400).send(err.message.split(': ').slice(-1)[0])
     );
 };
@@ -79,10 +87,20 @@ export const login = async (req, res) => {
   if (!isMatch) {
     return res.status(401).send('Password incorrect');
   }
+  
+   //check status active
+  const statusUser = user.active;
+  if(statusUser == false) {
+    res.status(401).send('User not activeted');
+  }
+  else{
+    addJwtCookie(res, user._id)
 
-  addJwtCookie(res, user._id)
+    res.status(200).send('Log in successful')
+  }
 
-  res.status(200).send('Log in successful')
+
+ 
 };
 
 

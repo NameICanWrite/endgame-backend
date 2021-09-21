@@ -18,6 +18,10 @@ const userSchema = mongoose.Schema({
     required: [true, "Password is required"],
     minlength: 5,
   },
+  active: {
+    type: Boolean,
+    default: false,
+  },
   data: {
     type: Object,
     required: [true, "data is required"],

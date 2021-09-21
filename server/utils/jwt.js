@@ -19,6 +19,7 @@ import {promisify} from 'util'
     }
   
     res.cookie('jwt', token, cookieOptions);
+    return token
   }
 
   export async function jwtParser(req, res, next) {
