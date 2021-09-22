@@ -132,7 +132,7 @@ io.on('connection', async (socket) => {
                         }
                     })
                     socket.disconnect(true)
-                    clearInterval(roomsData.get(battle.id).turnTimer)
+                    clearInterval(roomsData.get(battle.id)?.turnTimer)
                 }
             } else {
 

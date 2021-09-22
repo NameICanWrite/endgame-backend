@@ -31,7 +31,7 @@ export function giveCards(user) {
     if (card.name) return card
     if (!card.name) return (() => {
       let newCard
-      while (!newCard || !array.some(currentCard => newCard?.name == currentCard.name)) {
+      while (!newCard || array.some(currentCard => newCard?.name == currentCard.name)) {
         newCard = allCards[Math.floor(Math.random() * 20)]
       }
       return newCard
