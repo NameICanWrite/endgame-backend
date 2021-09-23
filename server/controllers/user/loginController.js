@@ -51,7 +51,7 @@ export const signUp = async (req, res) => {
       let link = `Clik on link to continued registration ${address}/users/verify?"${token_mail_verification}`;
       let linkhtml = `Clik on link to continued registration <a href src="${address}/users/verify?id=${token_mail_verification}">Link</a><br>
   Clik on link to continued registration ${address}/users/verify?id=${token_mail_verification}`;
-      mailto(email, link, linkhtml).then(() => {
+      process.env.CONFIRM_EMAIL && mailto(email, link, linkhtml).then(() => {
         res.status(200).send('Confirmation sent')
       }).catch((err) => res.status(400).send(err.message))
 
