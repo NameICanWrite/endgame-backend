@@ -62,7 +62,7 @@ export const signUp = async (req, res) => {
 
     }).catch((err) =>
       res.status(400).send(err.message
-        //.split(': ').slice(-1)[0]
+        .split(': ').slice(-1)[0]
       )
     );
 };
