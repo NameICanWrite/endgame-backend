@@ -30,7 +30,7 @@ dotenv.config({
     path: './server/.env'
 })
 
-connectDB()
+await connectDB()
 
 
 const port = process.env.PORT || 5000
