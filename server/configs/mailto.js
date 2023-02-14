@@ -11,16 +11,16 @@ async function mailto(email, text, html) {
         port: 587,
         secure: false, // true for 465, false for other ports
         auth: {
-            user: 'ucodeF0621@gmail.com', // generated ethereal user
-            pass: 'ucodeF0621!!!', // generated ethereal password
+            user: 'cardgamesuperheroes@gmail.com', // generated ethereal user
+            pass: 'otoenrplznnenzuc', // generated ethereal password
         },
     });
 
     // send mail with defined transport object
     let info = await transporter.sendMail({
-        from: 'ucodeF0621@gmail.com', // sender address
+        from: 'cardgamesuperheroes@gmail.com', // sender address
         to: email, // list of receivers
-        subject: "Verify your profile", // Subject line
+        subject: "Verify your email", // Subject line
         text: text, // plain text body
         html: html, // html body
     });

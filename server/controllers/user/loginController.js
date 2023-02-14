@@ -48,14 +48,13 @@ export const signUp = async (req, res) => {
       //send email link token
       let token_mail_verification = addJwtCookie(res, user._id);
       
-      let link = `Clik on link to continued registration ${address}/users/verify?"${token_mail_verification}`;
-      let linkhtml = `Clik on link to continued registration <a href src="${address}/users/verify?id=${token_mail_verification}">Link</a><br>
-  Clik on link to continued registration ${address}/users/verify?id=${token_mail_verification}`;
+      let text = ''
+      let linkhtml = `<a href="${address}/users/verify?id=${token_mail_verification}">Click this link to continue registration at card-battle.netlify.app</a>`
       
   process.env.CONFIRM_EMAIL 
         ? 
-          mailto(email, link, linkhtml).then(() => {
-            res.status(200).send('Confirmation sent')
+          mailto(email, text, linkhtml).then(() => {
+            res.status(200).send('Email confirmation sent')
           }).catch((err) => res.status(400).send(err.message)) 
         :
           res.status(200).send('Sign up successfully')
@@ -91,7 +90,7 @@ export const login = async (req, res) => {
   if (!user) {
     return res.status(400).send('User doesn\'t exist');
   }
-
+  console.log(user)
   //check password
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) {
@@ -101,7 +100,7 @@ export const login = async (req, res) => {
   //check status active if needed
   const statusUser = user.active || !process.env.CONFIRM_EMAIL;
   if (statusUser == false) {
-    res.status(401).send('User not activeted');
+    res.status(401).send('User not activated');
   } else {
     addJwtCookie(res, user._id)
 

@@ -13,6 +13,7 @@ export const startBattle = async (req, res) => {
         username,
         hp: 20,
     }
+    // console.log('starting battle...')
 
     currentUser = giveCards(currentUser)
 

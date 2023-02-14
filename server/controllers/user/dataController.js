@@ -29,7 +29,7 @@ export async function activeUser(req, res) {
     if (token == token_cookie) {
         let id = req.decoded.id;
         await User.findByIdAndUpdate(id, { $set: { active: true } });
-        res.send('Verify done success');
+        res.redirect(process.env.NODE_ENV === 'production' ? 'https://card-battle.netlify.app' : 'http://localhost:3000');
     }
 
     else { res.send('Token dont match') }

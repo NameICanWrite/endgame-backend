@@ -43,14 +43,14 @@ const app = express()
 
 
 app.use(cors({
-    origin: ["https://vigorous-volhard-c82a2c.netlify.app", "http://localhost:3000"],
+    origin: ["https://card-battle.netlify.app", "http://localhost:3000"],
     methods: ["GET", "POST", "OPTIONS"],
     credentials: true
 }))
 const server = http.createServer(app)
 const io = new Server(server, {
     cors: {
-        origin: ["https://vigorous-volhard-c82a2c.netlify.app", "http://localhost:3000"],
+        origin: ["https://card-battle.netlify.app", "http://localhost:3000"],
         methods: ["GET", "POST"],
         credentials: true
     }
@@ -82,6 +82,7 @@ io.on('connection', async (socket) => {
             }
         }
     })
+    console.log(battle)
 
     //battle should be already created by POST battle/start
     if (battle) {
